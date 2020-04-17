@@ -1,0 +1,77 @@
+// Yellow Corners
+//
+// Adds those yellow corner borders to a container. Needs a parent container, all content should go in a child container.  Only add content if you want it to apply to both corners, for example overidding the width or height.
+//
+// $param  = 15px - Determines amount of yellow that appears outside of corners
+//
+// Definition:
+// @mixin yellow-corners($param: null) {
+//
+// }
+//
+// Usage:
+// .container {
+//   @include yellow-corners;
+// }
+//
+// Compiled:
+// .sample {
+//   position: relative;
+//   padding: 15px;
+// }
+//
+// .sample::before {
+//   content: '';
+//   position: absolute;
+//   top: 0;
+//   left: 0;
+//   display: inline-block;
+//   width: 40%;
+//   max-width: 310px;
+//   height: 155px;
+//   background: #fc3;
+// }
+//
+// .sample::after {
+//   content: '';
+//   position: absolute;
+//   right: 0;
+//   bottom: 0;
+//   display: inline-block;
+//   width: 40%;
+//   max-width: 310px;
+//   height: 155px;
+//   background: #fc3;
+// }
+//
+// Styleguide Sass Mixins.Yellow Corners
+@mixin yellow-corners($padding: 15px) {
+  position: relative;
+  padding: $padding;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-block;
+    width: 40%;
+    max-width: 310px;
+    height: 155px;
+    background: primary-color(yellow);
+    @content;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: inline-block;
+    width: 40%;
+    max-width: 310px;
+    height: 155px;
+    background: primary-color(yellow);
+    @content;
+  }
+}

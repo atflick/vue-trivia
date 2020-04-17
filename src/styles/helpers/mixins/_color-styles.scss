@@ -1,0 +1,49 @@
+// Color Styles
+//
+// Mixin description
+//
+// $param  = null - Parameter description
+//
+// Definition:
+// @mixin color-styles($param: null) {
+//
+// }
+//
+// Usage:
+// .sample {
+//   @include color-styles;
+// }
+//
+// Compiled:
+// .sample {
+//
+// }
+//
+// Styleguide Sass Mixins.Color Styles
+@mixin color-styles {
+
+  &.-gray-dark,
+  .-gray-dark & {
+    color: primary-color(gray, shade3);
+  }
+
+  &.-gray-medium,
+  .-gray-medium & {
+    color: primary-color(gray, shade2);
+  }
+
+  &.-black,
+  .-black & {
+    color: primary-color(black);
+  }
+
+  &.-white,
+  .-white & {
+    color: primary-color(white);
+  }
+
+  &.-yellow,
+  .-yellow & {
+    color: primary-color(yellow);
+  }
+}

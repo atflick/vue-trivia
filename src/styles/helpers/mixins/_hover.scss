@@ -1,0 +1,36 @@
+// Hover
+//
+// Add styles for :hover, .-hover (for js activation), :focus and :active
+//
+// Definition:
+// @mixin hover {
+//   &:active,
+//   &:focus,
+//   &:hover {
+//     @content;
+//   }
+// }
+//
+// Usage:
+// .sample {
+//   @include hover {
+//     color: red;
+//   }
+// }
+//
+// Compiled:
+// .sample:active,
+// .sample:focus,
+// .sample:hover, {
+//   color: red;
+// }
+//
+// Styleguide Sass Mixins.Eyebrow Text
+@mixin hover {
+  &:active,
+  &:focus,
+  &.-hovered,
+  &:hover {
+    @content;
+  }
+}

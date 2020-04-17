@@ -1,0 +1,96 @@
+// Content Constraint
+//
+// Applies a padding and or margin to a parent container and max-width to an inner container
+// to constrain content size and keep side padding consistent across device sizes
+//
+// $width = 1400px - Max-width of container
+// $padding = 60px - Side padding at widest viewport
+// $margin = 80px - MArgin applied to top and bottom of components
+//
+// Definition:
+// @mixin content-constraint($width: 1400px) {
+//   max-width: $width;
+//   margin-left: auto;
+//   margin-right: auto;
+// }
+//
+// Usage:
+// .sample {
+//   @include content-constraint;
+// }
+//
+// Compiled:
+// .sample {
+//   margin-bottom: 50px;
+//   padding-left: 25px;
+//   padding-right: 25px;
+// }
+//
+// @media (min-width: 700px) {
+//   .sample {
+//     margin-bottom: 80px;
+//     padding-left: 50px;
+//     padding-right: 50px;
+//   }
+// }
+//
+// @media (min-width: 1000px) {
+//   .sample {
+//     padding-left: 75px;
+//     padding-right: 75px;
+//   }
+// }
+//
+// .sample-inner {
+//   width: 100%;
+//   max-width: 1200px;
+//   margin-left: auto;
+//   margin-right: auto;
+// }
+//
+// Weight: -99
+//
+// Styleguide Sass Mixins.Content Constraint
+@mixin content-constraint($width: $max-width, $margin: $vertical-spacing-mobile, $inner-padding: true, $match-header: false) {
+  @if $margin != 0 and not $inner-padding {
+    margin-bottom: $margin;
+    margin-top: $margin;
+  }
+  padding-left: $mobile-padding;
+  padding-right: $mobile-padding;
+
+  @include from(7) {
+    @if $margin != 0 and not $inner-padding {
+      margin-bottom: $margin * 1.5;
+      margin-top: $margin * 1.5;
+    }
+  }
+
+  @if $match-header {
+    @include from(14) {
+      padding-left: $desktop-padding;
+      padding-right: $desktop-padding;
+    }
+  } @else {
+    @include from(9) {
+      padding-left: $desktop-padding;
+      padding-right: $desktop-padding;
+    }
+  }
+
+  &-inner {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: $width;
+    @if $inner-padding {
+      padding-top: 50px;
+      padding-bottom: 50px;
+
+      @include from(7) {
+        padding-top: 75px;
+        padding-bottom: 75px;
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+// Inner Bg Styles
+//
+// Mixin description
+//
+// $param  = null - Parameter description
+//
+// Definition:
+// @mixin inner-bg-styles($param: null) {
+//
+// }
+//
+// Usage:
+// .sample {
+//   @include inner-bg-styles;
+// }
+//
+// Compiled:
+// .sample {
+//
+// }
+//
+// Styleguide Sass Mixins.Inner Bg Styles
+@mixin inner-bg-styles($selector: false) {
+  [data-inner-background='gray-dark'] & {
+    color: primary-color(white);
+
+    @if $selector == 'link' {
+
+      &.button {
+        color: primary-color(black);
+      }
+
+      &.-rte-caps {
+        color: primary-color(white);
+      }
+    }
+  }
+
+  [data-inner-background='gray'] & {
+    color: primary-color(gray, shade3);
+
+    @if $selector == 'link' {
+      &.button {
+        color: primary-color(black);
+      }
+    }
+  }
+
+  [data-inner-background='yellow'] & {
+    color: primary-color(gray, shade3);
+
+    @if $selector == 'link' {
+      border-color: primary-color(black);
+
+      &.-rte-caps {
+        background-image: linear-gradient(360deg, transparent, transparent 5px, primary-color(white) 5px, primary-color(white) 8px, transparent 8px);
+      }
+    }
+  }
+}

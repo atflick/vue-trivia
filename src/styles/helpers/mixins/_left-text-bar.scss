@@ -1,0 +1,50 @@
+// Left Text Bar
+//
+// Mixin description
+//
+// $param  = null - Parameter description
+//
+// Definition:
+// @mixin left-text-bar($param: null) {
+//
+// }
+//
+// Usage:
+// .title {
+//   @include left-text-bar($top: -5px, $bottom: -5px, $left: -30px, $width: 8px);
+// }
+//
+// Compiled:
+// .title {
+// position: relative;
+//
+//   &::before {
+//     content: '';
+//     position: absolute;
+//     top: -5px;
+//     bottom: -5px;
+//     left: -30px;
+//     display: inline-block;
+//     width: 9px;
+//     background: #fc3;
+//     transition: 0.25s ease-in-out;
+//   }
+// }
+//
+// Styleguide Sass Mixins.Left Text Bar
+@mixin left-text-bar($top: 5%, $bottom: 15%, $left: -30px, $width: 9px, $color: primary-color(yellow)) {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: $top;
+    bottom: $bottom;
+    left: $left;
+    display: inline-block;
+    width: 9px;
+    background: $color;
+    transition: $ts $te;
+    @content;
+  }
+}
