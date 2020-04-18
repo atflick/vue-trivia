@@ -1,7 +1,9 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-page-container>
-      <router-view></router-view>
+      <main>
+        <router-view></router-view>
+      </main>
     </q-page-container>
   </q-layout>
 </template>
