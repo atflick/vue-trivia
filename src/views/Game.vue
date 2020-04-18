@@ -16,7 +16,10 @@
     </q-drawer>
 
     <q-page-container>
-
+      <div :show="!gameData.inProgress" class="pre-game">
+        {{userExists}}
+        <CreateUser :user="userExists" :gameRef="gameRef" @user-join="onUserJoin"/>
+      </div>
     </q-page-container>
 
   </q-layout>
@@ -24,31 +27,42 @@
 
 <script>
 import { gamesCollection } from '@/firebase'
+import CreateUser from '@/components/CreateUser'
 
 export default {
   name: 'Game',
   components: {
-
+    CreateUser
   },
   props: ['id'],
   data () {
     return {
       right: false,
+      gameRef: gamesCollection.doc(this.id),
       gameData: {}
     }
   },
   created () {
-    console.log(this.id)
+    console.log(this)
     this.fetchGame()
+  },
+  computed: {
+    userExists () {
+      console.log(this.$cookies)
+      return this.$cookies.get('vue-trivia-user')
+    }
   },
   methods: {
     fetchGame () {
-      gamesCollection.doc(this.id).get().then((doc) => {
+      this.gameRef.get().then((doc) => {
         if (doc.exists) {
           console.log(doc.data())
           this.gameData = doc.data()
         }
       })
+    },
+    onUserJoin () {
+      //
     }
   }
 
