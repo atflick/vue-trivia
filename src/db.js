@@ -1,7 +1,7 @@
+import firebase from 'firebase/app'
 import 'firebase/firestore'
-import { initializeApp } from 'firebase'
 
-export const db = initializeApp({
+export const db = firebase.initializeApp({
   apiKey: 'AIzaSyDhBAep0mMiuve54FRZyVH3oYXNmJbvjxs',
   authDomain: 'vue-trivia-94d5e.firebaseapp.com',
   databaseURL: 'https://vue-trivia-94d5e.firebaseio.com',
@@ -14,6 +14,8 @@ export const db = initializeApp({
 
 export const gamesCollection = db.collection('games')
 export const teamsCollection = db.collection('teams')
+export const { FieldValue, DocumentReference } = firebase.firestore
+
 // export const addTeam = (gameRef, teamId) => {
 //   gameRef.update({
 //     teams

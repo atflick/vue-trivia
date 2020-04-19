@@ -13,12 +13,14 @@
     <q-drawer show-if-above v-model="right" side="right" bordered>
       <!-- drawer content -->
       <q-btn dense flat round icon="close" @click="right = !right" />
+
+      <Leaderboard :teams="gameData.teams" />
     </q-drawer>
 
     <q-page-container>
       <div :show="!gameData.inProgress" class="pre-game">
         {{userExists}}
-        <CreateUser :user="userExists" :gameRef="gameRef" @user-join="onUserJoin"/>
+        <CreateUser :user="userExists" :gameId="gameData.id" @user-join="onUserJoin"/>
       </div>
     </q-page-container>
 
@@ -26,43 +28,41 @@
 </template>
 
 <script>
-import { gamesCollection } from '@/firebase'
+import {
+  // db,
+  gamesCollection
+} from '@/db'
+
 import CreateUser from '@/components/CreateUser'
+import Leaderboard from '@/components/Leaderboard'
 
 export default {
   name: 'Game',
   components: {
-    CreateUser
+    CreateUser,
+    Leaderboard
   },
   props: ['id'],
   data () {
     return {
       right: false,
-      gameRef: gamesCollection.doc(this.id),
       gameData: {}
     }
   },
-  created () {
-    console.log(this)
-    this.fetchGame()
+  firestore () {
+    return {
+      gameData: gamesCollection.doc(this.id)
+    }
   },
   computed: {
     userExists () {
-      console.log(this.$cookies)
       return this.$cookies.get('vue-trivia-user')
     }
   },
   methods: {
-    fetchGame () {
-      this.gameRef.get().then((doc) => {
-        if (doc.exists) {
-          console.log(doc.data())
-          this.gameData = doc.data()
-        }
-      })
-    },
     onUserJoin () {
-      //
+      console.log('user joined')
+      console.log(this)
     }
   }
 

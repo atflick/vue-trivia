@@ -13,11 +13,11 @@
 </template>
 
 <script>
-import { teamsCollection } from '@/firebase'
+import { teamsCollection, gamesCollection, FieldValue } from '@/db'
 
 export default {
   name: 'CreateUser',
-  props: ['user', 'gameRef'],
+  props: ['user', 'gameId'],
   data () {
     return {
       teamName: this.user !== null ? this.user : '',
@@ -34,12 +34,11 @@ export default {
         name: this.teamName,
         score: 0,
         answers: []
+      }).then((docRef) => {
+        gamesCollection.doc(this.gameId).update({
+          teams: FieldValue.arrayUnion(teamsCollection.doc(docRef.id))
+        }).then(() => { this.$emit('user-join') })
       })
-      // .then((docRef) => {
-      //   this.gameRef.update({
-      //     teams: db.
-      //   })
-      // })
     }
   }
 

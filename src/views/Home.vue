@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { gamesCollection } from '@/firebase'
+import { gamesCollection } from '@/db'
 
 export default {
   name: 'Home',
@@ -26,8 +26,12 @@ export default {
   data () {
     return {
       gameName: '',
+      games: [],
       cantSubmit: false
     }
+  },
+  mounted () {
+    console.log(this)
   },
   methods: {
 

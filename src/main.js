@@ -5,7 +5,7 @@ import './quasar'
 import './styles/main.scss'
 import VueCookies from 'vue-cookies'
 import { firestorePlugin } from 'vuefire'
-import { gamesCollection, teamsCollection } from 'firebase'
+import { db } from './db'
 
 Vue.use(VueCookies)
 Vue.use(firestorePlugin)
@@ -14,13 +14,13 @@ Vue.$cookies.config('60d')
 Vue.config.productionTip = false
 
 new Vue({
-  data: {
+  data: () => ({
     games: [],
     teams: []
-  },
+  }),
   firestore: {
-    games: gamesCollection,
-    teams: teamsCollection
+    games: db.collection('games'),
+    teams: db.collection('teams')
   },
   router,
   render: h => h(App)
