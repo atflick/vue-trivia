@@ -1,6 +1,6 @@
 <template>
-  <div class="create-user">
-    <h2 class="create-user-title">Join the Game</h2>
+  <div class="create-team">
+    <h2 class="create-team-title">Join the Game</h2>
     <p>Enter your name or team name below.  This name will be used to identify you on the leaderboard.</p>
     <q-input
       class="welcome-container-game-input"
@@ -16,28 +16,29 @@
 import { teamsCollection, gamesCollection, FieldValue } from '@/db'
 
 export default {
-  name: 'CreateUser',
-  props: ['user', 'gameId'],
+  name: 'CreateTeam',
+  props: ['team', 'gameId', 'host'],
   data () {
     return {
-      teamName: this.user !== null ? this.user : '',
+      teamName: this.team !== null ? this.team : '',
       cantSubmit: false
     }
   },
   methods: {
     submit () {
-      !this.teamName.length ? this.cantSubmit = true : this.addUser()
+      !this.teamName.length ? this.cantSubmit = true : this.addTeam()
     },
-    addUser () {
-      this.$cookies.set('vue-trivia-user', this.teamName)
+    addTeam () {
       teamsCollection.add({
         name: this.teamName,
         score: 0,
         answers: []
       }).then((docRef) => {
+        this.$cookies.set('vue-trivia-team', { name: this.teamName, id: docRef.id, host: true })
+
         gamesCollection.doc(this.gameId).update({
           teams: FieldValue.arrayUnion(teamsCollection.doc(docRef.id))
-        }).then(() => { this.$emit('user-join') })
+        }).then(() => { this.$emit('team-join') })
       })
     }
   }
@@ -46,7 +47,7 @@ export default {
 </script>
 
 <style lang="scss">
-  .create-user {
+  .create-team {
     max-width: 600px;
     padding: 25px;
     margin: 0 auto 20vh;

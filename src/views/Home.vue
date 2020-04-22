@@ -50,8 +50,7 @@ export default {
         teams: []
       })
         .then((docRef) => {
-          console.log('Document written with ID: ', docRef.id)
-          this.$router.push({ name: 'game', params: { id: docRef.id } })
+          this.$router.push({ name: 'game', params: { id: docRef.id, host: true } })
         })
         .catch((error) => {
           console.error('Error adding document: ', error)

@@ -18,9 +18,9 @@
     </q-drawer>
 
     <q-page-container>
-      <div :show="!gameData.inProgress" class="pre-game">
-        {{userExists}}
-        <CreateUser :user="userExists" :gameId="gameData.id" @user-join="onUserJoin"/>
+      <div v-show="!gameData.inProgress" class="pre-game">
+        <!-- {{teamCookie.name ? teamCookie.name : ''}} -->
+        <CreateTeam v-show="teamInGame === -1" :team="teamCookie.name" :host="host" :gameId="gameData.id" @team-join="onTeamJoin"/>
       </div>
     </q-page-container>
 
@@ -29,24 +29,31 @@
 
 <script>
 import {
-  // db,
-  gamesCollection
+  gamesCollection,
+  teamsCollection
 } from '@/db'
 
-import CreateUser from '@/components/CreateUser'
+import CreateTeam from '@/components/CreateTeam'
 import Leaderboard from '@/components/Leaderboard'
 
 export default {
   name: 'Game',
   components: {
-    CreateUser,
+    CreateTeam,
     Leaderboard
   },
-  props: ['id'],
+  props: ['id', 'host'],
   data () {
     return {
       right: false,
-      gameData: {}
+      gameData: {},
+      currentTeam: {},
+      teamCookie: {
+        name: '',
+        id: '',
+        host: false
+      },
+      teamInGame: -1
     }
   },
   firestore () {
@@ -54,16 +61,37 @@ export default {
       gameData: gamesCollection.doc(this.id)
     }
   },
-  computed: {
-    userExists () {
-      return this.$cookies.get('vue-trivia-user')
+  created () {
+    this.getTeamCookie()
+  },
+  watch: {
+    teamCookie: {
+      handler (teamCookie) {
+        if (teamCookie.id.length) {
+          this.$bind('currentTeam', teamsCollection.doc(teamCookie.id))
+        }
+        if (this.gameData.teams.length && teamCookie.id.length) {
+          this.teamInGame = this.gameData.teams.findIndex((derp) => {
+            console.log(derp.id, this.teamCookie.id)
+            return derp.id === this.teamCookie.id
+          })
+        }
+      }
     }
   },
   methods: {
-    onUserJoin () {
-      console.log('user joined')
+    getTeamCookie () {
+      const cookie = this.$cookies.get('vue-trivia-team')
+      if (cookie !== null) {
+        this.teamCookie = cookie
+      }
+    },
+    onTeamJoin () {
+      console.log('team joined')
       console.log(this)
+      this.getTeamCookie()
     }
+    // getTeamCookie ()
   }
 
 }
