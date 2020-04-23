@@ -7,13 +7,14 @@
       v-model="teamName" label="Player/Team Name"
       required
       error-message="Please enter a name"
-      :error="cantSubmit" />
+      :error="cantSubmit"
+      @keyup.enter="submit" />
     <q-btn @click="submit">Join!</q-btn>
   </div>
 </template>
 
 <script>
-import { teamsCollection, gamesCollection, FieldValue } from '@/db'
+import { gamesCollection } from '@/db'
 
 export default {
   name: 'CreateTeam',
@@ -29,23 +30,18 @@ export default {
       !this.teamName.length ? this.cantSubmit = true : this.addTeam()
     },
     addTeam () {
-      teamsCollection.add({
-        name: this.teamName,
-        score: 0,
-        answers: []
-      }).then((docRef) => {
-        this.$cookies.set('vue-trivia-team', { name: this.teamName, id: docRef.id, host: true })
+      console.log(gamesCollection.doc(this.gameId))
+      gamesCollection.doc(this.gameId)
+        .collection('teams').add({
+          name: this.teamName,
+          score: 0,
+          answers: []
+        }).then((docRef) => {
+          console.log(docRef.id)
 
-        // console.log(docRef.id)
-        gamesCollection.doc(this.gameId).update({
-          teams: FieldValue.arrayUnion(teamsCollection.doc(docRef.id))
-
-        }).then(() => {
-          console.log('added to game')
-
+          this.$cookies.set('vue-trivia-team', { name: this.teamName, id: docRef.id, host: true })
           this.$emit('team-join', docRef.id)
         })
-      })
     }
   }
 

@@ -8,7 +8,8 @@
           v-model="gameName" label="Game Name"
           required
           error-message="Please enter a game name"
-          :error="cantSubmit" />
+          :error="cantSubmit"
+          @keyup.enter="submit" />
         <q-btn @click="submit">Start new game</q-btn>
       </div>
     </div>

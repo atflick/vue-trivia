@@ -3,7 +3,7 @@
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-toolbar-title>
-          {{ gameData.name }}
+          {{ game.name }}
         </q-toolbar-title>
 
         <q-btn flat label="Leaderboard" icon-right="menu" @click="right = !right" />
@@ -14,15 +14,29 @@
       <!-- drawer content -->
       <q-btn dense flat round icon="close" @click="right = !right" />
 
-      <Leaderboard :teams="gameData.teams" />
+      <Leaderboard :teams="teams" />
     </q-drawer>
 
     <q-page-container>
-      <div v-show="loading" class="loading">LOADING</div>
+      <Loader :loading="loading" />
 
-      <div v-show="!gameData.inProgress && !loading" class="pre-game">
-        <!-- {{teamCookie.name ? teamCookie.name : ''}} -->
-        <CreateTeam v-show="!teamInGame" :team="teamCookie.name" :host="host" :gameId="gameData.id" @team-join="onTeamJoin"/>
+      <div v-show="!game.inProgress && !loading" class="pre-game">
+
+        <CreateTeam v-if="!teamInGame" :team="teamCookie.name" :host="host" :gameId="game.id" @team-join="onTeamJoin"/>
+        <div v-else-if="currentTeam.host" class="admin-panel">You are the host</div>
+        <div v-else class="waiting">
+          <q-spinner-gears
+            color="primary"
+            size="5em"
+          />
+          Waiting for host to start the game
+        </div>
+
+      </div>
+
+      <div class="game" v-show="game.inProgress && !loading">
+        <div v-if="teamInGame" class="questions">Questions!</div>
+        <div v-else="" class="not-in-game">Sorry this game is already in progress</div>
       </div>
     </q-page-container>
 
@@ -37,69 +51,63 @@ import {
 
 import CreateTeam from '@/components/CreateTeam'
 import Leaderboard from '@/components/Leaderboard'
+import Loader from '@/components/Loader'
 
 export default {
   name: 'Game',
   components: {
     CreateTeam,
-    Leaderboard
+    Leaderboard,
+    Loader
   },
   props: ['id', 'host'],
   data () {
     return {
       right: false,
-      gameData: {},
-      // teams: [],
+      game: {},
+      teams: null,
       currentTeam: {},
       teamCookie: {
         name: '',
         id: '',
         host: false
       },
-      teamInGame: true,
+      teamInGame: false,
       loading: true
     }
   },
   firestore () {
     return {
-      gameData: gamesCollection.doc(this.id)
+      game: gamesCollection.doc(this.id),
+      teams: gamesCollection.doc(this.id).collection('teams')
     }
   },
   mounted () {
+    this.loading = true
+    this.getTeamCookie()
     gamesCollection.doc(this.id).get().then((data) => {
-      this.getTeamCookie()
       this.loading = false
     })
   },
-  computed: {
-    teams () {
-      console.log('teams', this.gameData)
-      return this.gameData.teams
-    }
-  },
   watch: {
-    teamCookie () {
-      if (this.teamCookie.id.length) {
-        this.$bind('currentTeam', teamsCollection.doc(this.teamCookie.id))
-      }
-    },
-    teams (current, old) {
-      // console.log(current, old)
-
+    teams () {
       const teams = this.teams
       if (teams.length) {
         const teamIndex = teams.findIndex((team) => {
           return typeof team !== 'object' ? false : team.id === this.teamCookie.id
         })
 
-        console.log('team index', teamIndex)
-
         this.teamInGame = teamIndex !== -1
       } else {
         this.teamInGame = false
       }
-
-      console.log(this.teamInGame)
+    },
+    teamInGame (inGame) {
+      this.$bind('currentTeam',
+        gamesCollection.doc(this.id)
+          .collection('teams')
+          .doc(this.teamCookie.id)
+      )
     }
   },
   methods: {
@@ -113,8 +121,16 @@ export default {
       this.$bind('currentTeam', teamsCollection.doc(teamId))
       this.teamInGame = true
     }
-    // getTeamCookie ()
   }
-
 }
 </script>
+
+<style lang="scss">
+  .pre-game {
+    padding: 50px 25px;
+
+    @include from(7) {
+      padding: 75px;
+    }
+  }
+</style>
