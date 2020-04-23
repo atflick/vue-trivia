@@ -36,9 +36,15 @@ export default {
       }).then((docRef) => {
         this.$cookies.set('vue-trivia-team', { name: this.teamName, id: docRef.id, host: true })
 
+        // console.log(docRef.id)
         gamesCollection.doc(this.gameId).update({
           teams: FieldValue.arrayUnion(teamsCollection.doc(docRef.id))
-        }).then(() => { this.$emit('team-join') })
+
+        }).then(() => {
+          console.log('added to game')
+
+          this.$emit('team-join', docRef.id)
+        })
       })
     }
   }

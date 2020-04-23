@@ -31,7 +31,7 @@ export default {
     }
   },
   mounted () {
-    console.log(this)
+    // console.log(this)
   },
   methods: {
 
@@ -46,8 +46,7 @@ export default {
       gamesCollection.add({
         name: this.gameName,
         inProgress: false,
-        complete: false,
-        teams: []
+        complete: false
       })
         .then((docRef) => {
           this.$router.push({ name: 'game', params: { id: docRef.id, host: true } })

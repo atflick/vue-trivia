@@ -18,9 +18,11 @@
     </q-drawer>
 
     <q-page-container>
-      <div v-show="!gameData.inProgress" class="pre-game">
+      <div v-show="loading" class="loading">LOADING</div>
+
+      <div v-show="!gameData.inProgress && !loading" class="pre-game">
         <!-- {{teamCookie.name ? teamCookie.name : ''}} -->
-        <CreateTeam v-show="teamInGame === -1" :team="teamCookie.name" :host="host" :gameId="gameData.id" @team-join="onTeamJoin"/>
+        <CreateTeam v-show="!teamInGame" :team="teamCookie.name" :host="host" :gameId="gameData.id" @team-join="onTeamJoin"/>
       </div>
     </q-page-container>
 
@@ -47,13 +49,15 @@ export default {
     return {
       right: false,
       gameData: {},
+      // teams: [],
       currentTeam: {},
       teamCookie: {
         name: '',
         id: '',
         host: false
       },
-      teamInGame: -1
+      teamInGame: true,
+      loading: true
     }
   },
   firestore () {
@@ -61,22 +65,41 @@ export default {
       gameData: gamesCollection.doc(this.id)
     }
   },
-  created () {
-    this.getTeamCookie()
+  mounted () {
+    gamesCollection.doc(this.id).get().then((data) => {
+      this.getTeamCookie()
+      this.loading = false
+    })
+  },
+  computed: {
+    teams () {
+      console.log('teams', this.gameData)
+      return this.gameData.teams
+    }
   },
   watch: {
-    teamCookie: {
-      handler (teamCookie) {
-        if (teamCookie.id.length) {
-          this.$bind('currentTeam', teamsCollection.doc(teamCookie.id))
-        }
-        if (this.gameData.teams.length && teamCookie.id.length) {
-          this.teamInGame = this.gameData.teams.findIndex((derp) => {
-            console.log(derp.id, this.teamCookie.id)
-            return derp.id === this.teamCookie.id
-          })
-        }
+    teamCookie () {
+      if (this.teamCookie.id.length) {
+        this.$bind('currentTeam', teamsCollection.doc(this.teamCookie.id))
       }
+    },
+    teams (current, old) {
+      // console.log(current, old)
+
+      const teams = this.teams
+      if (teams.length) {
+        const teamIndex = teams.findIndex((team) => {
+          return typeof team !== 'object' ? false : team.id === this.teamCookie.id
+        })
+
+        console.log('team index', teamIndex)
+
+        this.teamInGame = teamIndex !== -1
+      } else {
+        this.teamInGame = false
+      }
+
+      console.log(this.teamInGame)
     }
   },
   methods: {
@@ -86,10 +109,9 @@ export default {
         this.teamCookie = cookie
       }
     },
-    onTeamJoin () {
-      console.log('team joined')
-      console.log(this)
-      this.getTeamCookie()
+    onTeamJoin (teamId) {
+      this.$bind('currentTeam', teamsCollection.doc(teamId))
+      this.teamInGame = true
     }
     // getTeamCookie ()
   }
