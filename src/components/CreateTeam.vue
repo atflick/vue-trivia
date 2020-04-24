@@ -30,15 +30,15 @@ export default {
       !this.teamName.length ? this.cantSubmit = true : this.addTeam()
     },
     addTeam () {
-      console.log(gamesCollection.doc(this.gameId))
-      gamesCollection.doc(this.gameId)
-        .collection('teams').add({
-          name: this.teamName,
-          score: 0,
-          answers: []
-        }).then((docRef) => {
-          console.log(docRef.id)
+      const team = {
+        name: this.teamName,
+        score: 0,
+        answers: [],
+        host: !!this.host
+      }
 
+      gamesCollection.doc(this.gameId)
+        .collection('teams').add(team).then((docRef) => {
           this.$cookies.set('vue-trivia-team', { name: this.teamName, id: docRef.id, host: true })
           this.$emit('team-join', docRef.id)
         })

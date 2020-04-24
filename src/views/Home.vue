@@ -47,7 +47,8 @@ export default {
       gamesCollection.add({
         name: this.gameName,
         inProgress: false,
-        complete: false
+        complete: false,
+        settings: {}
       })
         .then((docRef) => {
           this.$router.push({ name: 'game', params: { id: docRef.id, host: true } })

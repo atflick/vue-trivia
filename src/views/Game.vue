@@ -1,10 +1,9 @@
 <template>
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="bg-primary text-white">
-      <q-toolbar>
-        <q-toolbar-title>
-          {{ game.name }}
-        </q-toolbar-title>
+      <q-toolbar class="game-header">
+        <div class="game-title">{{ game.name }}</div>
+        <q-space />
 
         <q-btn flat label="Leaderboard" icon-right="menu" @click="right = !right" />
       </q-toolbar>
@@ -23,13 +22,24 @@
       <div v-show="!game.inProgress && !loading" class="pre-game">
 
         <CreateTeam v-if="!teamInGame" :team="teamCookie.name" :host="host" :gameId="game.id" @team-join="onTeamJoin"/>
-        <div v-else-if="currentTeam.host" class="admin-panel">You are the host</div>
+        <div v-else-if="isHost">
+          <CenterContainer maxWidth="550px">
+            <GameSettings :gameId="id"/>
+          </CenterContainer>
+        </div>
+
         <div v-else class="waiting">
-          <q-spinner-gears
-            color="primary"
-            size="5em"
-          />
-          Waiting for host to start the game
+          <CenterContainer maxWidth="550px">
+            <q-spinner-gears
+              class="spinner-gears"
+              color="primary"
+              size="5em"
+            />
+            <h3>Waiting...</h3>
+            <p>The host is setting up the game and will start when ready.</p>
+            <div class="">Number of questions: {{ game.settings.questions || '10' }}</div>
+            <div class="">Category: {{ game.settings.category || '-' }}</div>
+          </CenterContainer>
         </div>
 
       </div>
@@ -45,20 +55,23 @@
 
 <script>
 import {
-  gamesCollection,
-  teamsCollection
+  gamesCollection
 } from '@/db'
 
 import CreateTeam from '@/components/CreateTeam'
 import Leaderboard from '@/components/Leaderboard'
 import Loader from '@/components/Loader'
+import CenterContainer from '@/components/CenterContainer'
+import GameSettings from '@/components/GameSettings'
 
 export default {
   name: 'Game',
   components: {
     CreateTeam,
     Leaderboard,
-    Loader
+    Loader,
+    CenterContainer,
+    GameSettings
   },
   props: ['id', 'host'],
   data () {
@@ -69,11 +82,11 @@ export default {
       currentTeam: {},
       teamCookie: {
         name: '',
-        id: '',
-        host: false
+        id: ''
       },
       teamInGame: false,
-      loading: true
+      loading: true,
+      isHost: false
     }
   },
   firestore () {
@@ -102,12 +115,16 @@ export default {
         this.teamInGame = false
       }
     },
-    teamInGame (inGame) {
-      this.$bind('currentTeam',
-        gamesCollection.doc(this.id)
-          .collection('teams')
-          .doc(this.teamCookie.id)
-      )
+    teamInGame () {
+      if (this.teamCookie.id.length) {
+        this.bindCurrentTeam(this.teamCookie.id)
+      }
+    },
+    currentTeam (team) {
+      console.log(team)
+      if (team) {
+        this.isHost = team.host
+      }
     }
   },
   methods: {
@@ -117,8 +134,15 @@ export default {
         this.teamCookie = cookie
       }
     },
+    bindCurrentTeam (teamId) {
+      this.$bind('currentTeam',
+        gamesCollection.doc(this.id)
+          .collection('teams')
+          .doc(teamId)
+      )
+    },
     onTeamJoin (teamId) {
-      this.$bind('currentTeam', teamsCollection.doc(teamId))
+      this.bindCurrentTeam(teamId)
       this.teamInGame = true
     }
   }
@@ -126,11 +150,33 @@ export default {
 </script>
 
 <style lang="scss">
+  .game {
+    &-header {
+      @include from(7) {
+        padding: 0 50px;
+      }
+    }
+
+    &-title {
+      font-family: $header-font;
+      margin-bottom: 15px;
+      @include rem(font-size, 30px);
+
+      @include from(7) {
+        @include rem(font-size, 42px);
+      }
+    }
+  }
+
   .pre-game {
     padding: 50px 25px;
 
     @include from(7) {
       padding: 75px;
     }
+  }
+
+  .spinner-gears {
+    margin-bottom: 30px;
   }
 </style>
