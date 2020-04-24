@@ -24,7 +24,7 @@
         <CreateTeam v-if="!teamInGame" :team="teamCookie.name" :host="host" :gameId="game.id" @team-join="onTeamJoin"/>
         <div v-else-if="isHost">
           <CenterContainer maxWidth="550px">
-            <GameSettings :gameId="id"/>
+            <GameSettings :game="game"/>
           </CenterContainer>
         </div>
 
@@ -37,8 +37,8 @@
             />
             <h3>Waiting...</h3>
             <p>The host is setting up the game and will start when ready.</p>
-            <div class="">Number of questions: {{ game.settings.questions || '10' }}</div>
-            <div class="">Category: {{ game.settings.category || '-' }}</div>
+            <div class="">Number of questions: {{ game.settings.questions }}</div>
+            <div class="">Category: {{ game.settings.category }}</div>
           </CenterContainer>
         </div>
 
@@ -77,7 +77,15 @@ export default {
   data () {
     return {
       right: false,
-      game: {},
+      game: {
+        settings: {
+          questions: 10,
+          category: {
+            label: 'All Categories',
+            value: ''
+          }
+        }
+      },
       teams: null,
       currentTeam: {},
       teamCookie: {
@@ -98,11 +106,17 @@ export default {
   mounted () {
     this.loading = true
     this.getTeamCookie()
-    gamesCollection.doc(this.id).get().then((data) => {
-      this.loading = false
-    })
+    // gamesCollection.doc(this.id).get().then((data) => {
+    //   this.loading = false
+    // })
   },
   watch: {
+    game () {
+      if (this.game && this.game.name) {
+        console.log(this.game)
+        this.loading = false
+      }
+    },
     teams () {
       const teams = this.teams
       if (teams.length) {
@@ -141,9 +155,10 @@ export default {
           .doc(teamId)
       )
     },
-    onTeamJoin (teamId) {
+    onTeamJoin (teamId, host) {
       this.bindCurrentTeam(teamId)
       this.teamInGame = true
+      this.isHost = !!host
     }
   }
 }

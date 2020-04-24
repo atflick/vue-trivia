@@ -19,15 +19,15 @@
 </template>
 
 <script>
-// import { debounce } from '@/utils'
+import { debounce } from '@/utils'
 import { gamesCollection } from '@/db'
 export default {
   name: 'GameSettings',
-  props: ['gameId'],
+  props: ['game'],
   data () {
     return {
-      questions: 10,
-      category: '',
+      questions: this.getQuestions(),
+      category: this.getCategory(),
       categoryOptions: [
         {
           label: 'All Categories',
@@ -109,19 +109,33 @@ export default {
     }
   },
   methods: {
-    updateSettings () {
-      console.log(this.gameId)
-
-      gamesCollection.doc(this.gameId)
-        .set({
-          settings: {
-            questions: this.questions,
-            category: this.category.label
-          }
-        }, { merge: true })
-      // debounce(() => {
-
-      // }, 1000)
+    updateSettings: debounce(function () {
+      console.log(this.questions, this.category)
+      const settings = {
+        questions: this.questions,
+        category: this.category.label
+      }
+      const gameId = this.game.id
+      console.log(gameId)
+      gamesCollection.doc(gameId)
+        .set({ settings }, { merge: true })
+    }, 100, true),
+    getQuestions () {
+      if (this.game.settings && this.game.settings.questions) {
+        return this.game.settings.questions
+      } else {
+        return 10
+      }
+    },
+    getCategory () {
+      if (this.game.settings && this.game.settings.category) {
+        return this.game.settings.category
+      } else {
+        return {
+          label: 'All Categories',
+          value: ''
+        }
+      }
     }
   }
 
