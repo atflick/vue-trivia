@@ -19,7 +19,7 @@ jobs:
       uses: burnett01/rsync-deployments@4.0
       with:
         switches: -avz --no-perms --delete .
-        path: '/dist'
+        path: 'dist/'
         remote_path: trivia.andyflick.com
         remote_host: ${{ secrets.DEPLOY_HOST }}
         remote_port: ${{ secrets.DEPLOY_PORT }}
