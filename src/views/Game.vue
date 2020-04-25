@@ -44,9 +44,10 @@
 
       </div>
 
-      <div class="game" v-show="game.inProgress && !loading">
-        <div v-if="teamInGame" class="questions">Questions!</div>
-        <div v-else="" class="not-in-game">Sorry this game is already in progress</div>
+      <div class="game" v-show="inProgress && !loading">
+        <div v-if="!teamInGame" class="not-in-game">Sorry this game is already in progress</div>
+        <GameCountdown v-else-if="countDown > 0" :countDown="countDown" />
+        <div v-else class="questions">Questions!</div>
       </div>
     </q-page-container>
 
@@ -63,6 +64,7 @@ import Leaderboard from '@/components/Leaderboard'
 import Loader from '@/components/Loader'
 import CenterContainer from '@/components/CenterContainer'
 import GameSettings from '@/components/GameSettings'
+import GameCountdown from '@/components/GameCountdown'
 
 export default {
   name: 'Game',
@@ -71,21 +73,14 @@ export default {
     Leaderboard,
     Loader,
     CenterContainer,
-    GameSettings
+    GameSettings,
+    GameCountdown
   },
   props: ['id', 'host'],
   data () {
     return {
       right: false,
-      game: {
-        settings: {
-          questions: 10,
-          category: {
-            label: 'All Categories',
-            value: ''
-          }
-        }
-      },
+      game: {},
       teams: null,
       currentTeam: {},
       teamCookie: {
@@ -94,7 +89,9 @@ export default {
       },
       teamInGame: false,
       loading: true,
-      isHost: false
+      isHost: false,
+      inProgress: false,
+      countDown: 1
     }
   },
   firestore () {
@@ -106,15 +103,17 @@ export default {
   mounted () {
     this.loading = true
     this.getTeamCookie()
-    // gamesCollection.doc(this.id).get().then((data) => {
-    //   this.loading = false
-    // })
   },
   watch: {
     game () {
+      console.log(this.game)
+
       if (this.game && this.game.name) {
-        console.log(this.game)
         this.loading = false
+      }
+
+      if (this.game && this.game.inProgress) {
+        this.inProgress = true
       }
     },
     teams () {
@@ -135,9 +134,13 @@ export default {
       }
     },
     currentTeam (team) {
-      console.log(team)
       if (team) {
         this.isHost = team.host
+      }
+    },
+    inProgress (inProgress) {
+      if (inProgress) {
+        this.checkCountDown()
       }
     }
   },
@@ -159,12 +162,17 @@ export default {
       this.bindCurrentTeam(teamId)
       this.teamInGame = true
       this.isHost = !!host
+    },
+    checkCountDown () {
+      const t = new Date()
+      const utc = t.getTime()
+      this.countDown = this.game.startTime - utc
     }
   }
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   .game {
     &-header {
       @include from(7) {

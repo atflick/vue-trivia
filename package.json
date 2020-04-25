@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "axios": "^0.19.2",
     "core-js": "^3.6.4",
     "firebase": "^7.14.0",
     "import-glob-loader": "^1.1.0",

@@ -31,9 +31,6 @@ export default {
       cantSubmit: false
     }
   },
-  mounted () {
-    // console.log(this)
-  },
   methods: {
 
     submit () {

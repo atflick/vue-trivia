@@ -2,18 +2,43 @@
   <div class="game-settings">
     <h3>Game Setup</h3>
     <div class="game-settings-inner">
-      <label for="">Number of Questions: {{questions}}</label>
-      <q-slider
-        v-model="questions"
-        :min="10"
-        :max="50"
-        :step="5"
-        snap
-        color="primary"
-        @change="updateSettings"
-      />
+      <div class="game-settings-field">
+        <label>Number of Questions: {{questions}}</label>
+        <q-slider
+          v-model="questions"
+          :min="10"
+          :max="50"
+          :step="5"
+          snap
+          color="primary"
+          @change="updateSettings"
+        />
+      </div>
 
-      <q-select v-model="category" :options="categoryOptions" label="Category" @input="updateSettings" />
+      <div class="game-settings-field -extra-space">
+        <label>Category</label>
+        <q-select v-model="category" :options="categoryOptions" @input="updateSettings" />
+      </div>
+
+      <div class="game-settings-field -extra-space">
+        <label>Difficulty</label>
+        <q-select v-model="difficulty" :options="difficultyOptions" @input="updateSettings" />
+      </div>
+
+      <div class="game-settings-field">
+        <label>Question Timer: {{timer}} seconds</label>
+        <q-slider
+          v-model="timer"
+          :min="30"
+          :max="600"
+          :step="15"
+          snap
+          color="primary"
+          @change="updateSettings"
+        />
+      </div>
+
+      <q-btn @click="start">Start game</q-btn>
     </div>
   </div>
 </template>
@@ -21,6 +46,8 @@
 <script>
 import { debounce } from '@/utils'
 import { gamesCollection } from '@/db'
+import axios from 'axios'
+
 export default {
   name: 'GameSettings',
   props: ['game'],
@@ -28,10 +55,12 @@ export default {
     return {
       questions: this.getQuestions(),
       category: this.getCategory(),
+      difficulty: this.getDifficulty(),
+      timer: this.getTimer(),
       categoryOptions: [
         {
           label: 'All Categories',
-          value: ''
+          value: 'all'
         },
         {
           label: 'General Knowledge',
@@ -105,18 +134,18 @@ export default {
           label: 'Vehicles',
           value: '28'
         }
-      ]
+      ],
+      difficultyOptions: ['Easy', 'Medium', 'Hard']
     }
   },
   methods: {
     updateSettings: debounce(function () {
-      console.log(this.questions, this.category)
       const settings = {
         questions: this.questions,
-        category: this.category.label
+        category: this.category,
+        timer: this.timer
       }
       const gameId = this.game.id
-      console.log(gameId)
       gamesCollection.doc(gameId)
         .set({ settings }, { merge: true })
     }, 100, true),
@@ -133,20 +162,68 @@ export default {
       } else {
         return {
           label: 'All Categories',
-          value: ''
+          value: 'all'
         }
       }
+    },
+    getDifficulty () {
+      if (this.game.settings && this.game.settings.difficulty) {
+        return this.game.settings.difficulty
+      } else {
+        return 'Any Difficulty'
+      }
+    },
+    getTimer () {
+      if (this.game.settings && this.game.settings.timer) {
+        return this.game.settings.timer
+      } else {
+        return 30
+      }
+    },
+    start () {
+      let url = 'https://opentdb.com/api.php?'
+      url += `amount=${this.questions}`
+
+      if (this.category.value !== 'all') {
+        url += `&category=${this.category.value}`
+      }
+
+      if (this.difficulty !== 'Any Difficulty') {
+        url += `&difficulty=${this.difficulty.toLowerCase()}`
+      }
+
+      axios.get(url).then(({ data }) => {
+        const t = new Date()
+        const utc = t.getTime()
+        console.log(utc)
+
+        t.getSeconds()
+        gamesCollection.doc(this.game.id)
+          .set({
+            questions: data.results,
+            inProgress: true,
+            startTime: utc + 50000
+          }, { merge: true })
+      })
     }
   }
 
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   .game-settings {
 
     &-inner {
       text-align: left;
+    }
+
+    &-field {
+      margin-bottom: 20px;
+
+      &.-extra-space {
+        margin-bottom: 35px;
+      }
     }
 
     label {
