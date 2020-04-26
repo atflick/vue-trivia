@@ -1,15 +1,28 @@
 <template>
   <div class="game-countdown">
-    <CenterContainer>
-      <div>Game will start in</div>
-      <div>{{timeLeft}}</div>
-      <div>seconds</div>
+    <CenterContainer maxWidth="550px">
+      <q-circular-progress
+        show-value
+        :value="-secondsLeft"
+        :min="-300"
+        :max="0"
+        size="300px"
+        :thickness="0.3"
+        color="orange"
+        track-color="grey-3"
+      >
+        <div class="game-countdown-inner">
+          <div class="game-countdown-text">Game will start in</div>
+          <div class="game-countdown-text">{{timeLeft}}</div>
+        </div>
+      </q-circular-progress>
     </CenterContainer>
 
   </div>
 </template>
 
 <script>
+import { gamesCollection } from '@/db'
 import CenterContainer from '@/components/CenterContainer'
 
 export default {
@@ -17,23 +30,48 @@ export default {
   components: {
     CenterContainer
   },
-  props: ['countDown'],
+  props: ['startTime', 'gameId'],
   data () {
     return {
-      timeLeft: this.countDown
+      msLeft: this.startTime - new Date().getTime(),
+      initialTime: this.startTime - 300000
     }
   },
   created () {
     this.countDownTimer()
   },
+  computed: {
+    timeLeft () {
+      const secondsLeft = this.msLeft / 1000
+      console.log(secondsLeft)
+
+      const minutes = Math.floor(secondsLeft / 60)
+      const seconds = secondsLeft % 60
+
+      if (minutes >= 1) {
+        return `less than ${minutes + 1} minutes`
+      } else {
+        return `${seconds < 0 ? 0 : Math.floor(seconds)} second${seconds === 1 ? '' : 's'}`
+      }
+    },
+    secondsLeft () {
+      console.log(this.msLeft / 1000)
+
+      return this.msLeft / 1000
+    }
+  },
   methods: {
     countDownTimer () {
-      console.log(this.timeLeft)
-      if (this.timeLeft > 0) {
+      if (this.msLeft > 0) {
         setTimeout(() => {
-          this.timeLeft -= 1
+          this.msLeft -= 1000
           this.countDownTimer()
         }, 1000)
+      } else {
+        gamesCollection.doc(this.gameId)
+          .set({
+            inProgress: true
+          }, { merge: true })
       }
     }
   }
@@ -42,5 +80,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+  .game-countdown {
 
+    &-inner {
+      padding: 60px;
+    }
+
+    &-text {
+      @include rem(font-size, 16px);
+
+      @include from(5) {
+        @include rem(font-size, 20px);
+      }
+    }
+  }
+
+  .q-circular-progress {
+    @include to(4) {
+      font-size: 220px !important;
+    }
+  }
 </style>

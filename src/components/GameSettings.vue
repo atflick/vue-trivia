@@ -194,15 +194,12 @@ export default {
 
       axios.get(url).then(({ data }) => {
         const t = new Date()
-        const utc = t.getTime()
-        console.log(utc)
+        const utc = t.getTime() + 300000
 
-        t.getSeconds()
         gamesCollection.doc(this.game.id)
           .set({
             questions: data.results,
-            inProgress: true,
-            startTime: utc + 50000
+            startTime: utc
           }, { merge: true })
       })
     }

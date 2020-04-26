@@ -17,37 +17,40 @@
     </q-drawer>
 
     <q-page-container>
-      <Loader :loading="loading" />
+      <div class="game-container">
+        <Loader :loading="loading" />
 
-      <div v-show="!game.inProgress && !loading" class="pre-game">
+        <div v-if="!started && !loading">
 
-        <CreateTeam v-if="!teamInGame" :team="teamCookie.name" :host="host" :gameId="game.id" @team-join="onTeamJoin"/>
-        <div v-else-if="isHost">
-          <CenterContainer maxWidth="550px">
-            <GameSettings :game="game"/>
-          </CenterContainer>
+          <CreateTeam v-if="!teamInGame" :team="teamCookie.name" :host="host" :gameId="game.id" @team-join="onTeamJoin"/>
+
+          <div v-else-if="isHost">
+            <CenterContainer maxWidth="550px">
+              <GameSettings :game="game"/>
+            </CenterContainer>
+          </div>
+
+          <div v-else class="waiting">
+            <CenterContainer maxWidth="550px">
+              <q-spinner-gears
+                class="spinner-gears"
+                color="primary"
+                size="5em"
+              />
+              <h3>Waiting...</h3>
+              <p>The host is setting up the game and will start when ready.</p>
+              <div class="">Number of questions: {{ game.settings.questions }}</div>
+              <div class="">Category: {{ game.settings.category }}</div>
+            </CenterContainer>
+          </div>
+
         </div>
 
-        <div v-else class="waiting">
-          <CenterContainer maxWidth="550px">
-            <q-spinner-gears
-              class="spinner-gears"
-              color="primary"
-              size="5em"
-            />
-            <h3>Waiting...</h3>
-            <p>The host is setting up the game and will start when ready.</p>
-            <div class="">Number of questions: {{ game.settings.questions }}</div>
-            <div class="">Category: {{ game.settings.category }}</div>
-          </CenterContainer>
+        <div class="game" v-if="started && !loading">
+          <div v-if="!teamInGame" class="not-in-game">Sorry this game is already in progress</div>
+          <div v-else-if="inProgress" class="questions">Questions!</div>
+          <GameCountdown v-else :startTime="this.game.startTime" :gameId="id" />
         </div>
-
-      </div>
-
-      <div class="game" v-show="inProgress && !loading">
-        <div v-if="!teamInGame" class="not-in-game">Sorry this game is already in progress</div>
-        <GameCountdown v-else-if="countDown > 0" :countDown="countDown" />
-        <div v-else class="questions">Questions!</div>
       </div>
     </q-page-container>
 
@@ -90,8 +93,8 @@ export default {
       teamInGame: false,
       loading: true,
       isHost: false,
-      inProgress: false,
-      countDown: 1
+      started: false,
+      inProgress: false
     }
   },
   firestore () {
@@ -110,6 +113,10 @@ export default {
 
       if (this.game && this.game.name) {
         this.loading = false
+      }
+
+      if (this.game && this.game.startTime) {
+        this.started = true
       }
 
       if (this.game && this.game.inProgress) {
@@ -137,11 +144,6 @@ export default {
       if (team) {
         this.isHost = team.host
       }
-    },
-    inProgress (inProgress) {
-      if (inProgress) {
-        this.checkCountDown()
-      }
     }
   },
   methods: {
@@ -162,11 +164,6 @@ export default {
       this.bindCurrentTeam(teamId)
       this.teamInGame = true
       this.isHost = !!host
-    },
-    checkCountDown () {
-      const t = new Date()
-      const utc = t.getTime()
-      this.countDown = this.game.startTime - utc
     }
   }
 }
@@ -189,13 +186,13 @@ export default {
         @include rem(font-size, 42px);
       }
     }
-  }
 
-  .pre-game {
-    padding: 50px 25px;
+    &-container {
+      padding: 50px 25px;
 
-    @include from(7) {
-      padding: 75px;
+      @include from(7) {
+        padding: 75px;
+      }
     }
   }
 
