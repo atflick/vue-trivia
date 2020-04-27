@@ -4,7 +4,7 @@
       <q-circular-progress
         show-value
         :value="-secondsLeft"
-        :min="-300"
+        :min="-spinnerMax"
         :max="0"
         size="300px"
         :thickness="0.3"
@@ -24,6 +24,7 @@
 <script>
 import { gamesCollection } from '@/db'
 import CenterContainer from '@/components/CenterContainer'
+import { gameWait } from '@/variables'
 
 export default {
   name: 'GameCountdown',
@@ -34,7 +35,8 @@ export default {
   data () {
     return {
       msLeft: this.startTime - new Date().getTime(),
-      initialTime: this.startTime - 300000
+      initialTime: this.startTime - gameWait,
+      spinnerMax: gameWait / 1000
     }
   },
   created () {

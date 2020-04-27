@@ -47,6 +47,7 @@
 import { debounce } from '@/utils'
 import { gamesCollection } from '@/db'
 import axios from 'axios'
+import { gameWait } from '@/variables'
 
 export default {
   name: 'GameSettings',
@@ -194,7 +195,7 @@ export default {
 
       axios.get(url).then(({ data }) => {
         const t = new Date()
-        const utc = t.getTime() + 300000
+        const utc = t.getTime() + gameWait
 
         gamesCollection.doc(this.game.id)
           .set({

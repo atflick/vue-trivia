@@ -33,7 +33,7 @@ export default {
       const team = {
         name: this.teamName,
         score: 0,
-        answers: [],
+        answers: {},
         host: !!this.host
       }
 

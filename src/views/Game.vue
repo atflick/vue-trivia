@@ -48,8 +48,10 @@
 
         <div class="game" v-if="started && !loading">
           <div v-if="!teamInGame" class="not-in-game">Sorry this game is already in progress</div>
-          <div v-else-if="inProgress" class="questions">Questions!</div>
-          <GameCountdown v-else :startTime="this.game.startTime" :gameId="id" />
+          <div v-else-if="inProgress" class="questions">
+            <Questions :questions="game.questions" :currentQuestion="game.currentQuestion" :teamRef="teamRef" :teamAnswers="currentTeam.answers" />
+          </div>
+          <GameCountdown v-else :startTime="game.startTime" :gameId="id" />
         </div>
       </div>
     </q-page-container>
@@ -68,6 +70,7 @@ import Loader from '@/components/Loader'
 import CenterContainer from '@/components/CenterContainer'
 import GameSettings from '@/components/GameSettings'
 import GameCountdown from '@/components/GameCountdown'
+import Questions from '@/components/Questions'
 
 export default {
   name: 'Game',
@@ -77,7 +80,8 @@ export default {
     Loader,
     CenterContainer,
     GameSettings,
-    GameCountdown
+    GameCountdown,
+    Questions
   },
   props: ['id', 'host'],
   data () {
@@ -94,7 +98,8 @@ export default {
       loading: true,
       isHost: false,
       started: false,
-      inProgress: false
+      inProgress: false,
+      teamRef: {}
     }
   },
   firestore () {
@@ -143,8 +148,12 @@ export default {
     currentTeam (team) {
       if (team) {
         this.isHost = team.host
+        this.teamRef = gamesCollection.doc(this.id).collection('teams').doc(team.id)
       }
     }
+  },
+  computed: {
+
   },
   methods: {
     getTeamCookie () {

@@ -45,7 +45,8 @@ export default {
         name: this.gameName,
         inProgress: false,
         complete: false,
-        settings: {}
+        settings: {},
+        currentQuestion: 1
       })
         .then((docRef) => {
           this.$router.push({ name: 'game', params: { id: docRef.id, host: true } })
