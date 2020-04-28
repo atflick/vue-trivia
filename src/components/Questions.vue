@@ -33,8 +33,6 @@ export default {
   props: ['questions', 'currentQuestion', 'teamRef', 'teamAnswers'],
   methods: {
     getSavedAnswer (qNumber) {
-      console.log(this.teamAnswers)
-
       if (this.teamAnswers && this.teamAnswers[`question_${qNumber}`]) {
         return this.teamAnswers[`question_${qNumber}`]
       } else {
