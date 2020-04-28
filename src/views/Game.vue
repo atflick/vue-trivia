@@ -22,15 +22,13 @@
 
         <div v-if="!started && !loading">
 
-          <CreateTeam v-if="!teamInGame" :team="teamCookie.name" :host="host" :gameId="game.id" @team-join="onTeamJoin"/>
-
-          <div v-else-if="isHost">
+          <div v-if="isHost">
             <CenterContainer maxWidth="550px">
               <GameSettings :game="game"/>
             </CenterContainer>
           </div>
 
-          <div v-else class="waiting">
+          <div v-else-if="teamInGame" class="waiting">
             <CenterContainer maxWidth="550px">
               <q-spinner-gears
                 class="spinner-gears"
@@ -39,17 +37,21 @@
               />
               <h3>Waiting...</h3>
               <p>The host is setting up the game and will start when ready.</p>
-              <div class="">Number of questions: {{ game.settings.questions }}</div>
-              <div class="">Category: {{ game.settings.category }}</div>
+              <div class="">Number of questions: {{ game.settings.questions ? game.settings.questions : 10 }}</div>
+              <div class="">Category: {{ game.settings.category ? game.settings.category.label : 'All Categories' }}</div>
+              <div class="">Difficulty: {{ game.settings.difficulty ? game.settings.difficulty: 'Any Difficulty' }}</div>
+              <div class="">Question Timer: {{ game.settings.timer ? game.settings.timer : 30 }} seconds</div>
             </CenterContainer>
           </div>
+
+          <CreateTeam v-else :team="teamCookie.name" :host="host" :gameId="game.id" @team-join="onTeamJoin"/>
 
         </div>
 
         <div class="game" v-if="started && !loading">
           <div v-if="!teamInGame" class="not-in-game">Sorry this game is already in progress</div>
           <div v-else-if="inProgress" class="questions">
-            <Questions :questions="game.questions" :currentQuestion="game.currentQuestion" :teamRef="teamRef" :teamAnswers="currentTeam.answers" />
+            <Questions :questions="game.questions" :currentQuestion="game.currentQuestion" :teamRef="teamRef" :teamAnswers="currentTeam ? currentTeam.answers : null" />
           </div>
           <GameCountdown v-else :startTime="game.startTime" :gameId="id" />
         </div>
@@ -108,7 +110,7 @@ export default {
       teams: gamesCollection.doc(this.id).collection('teams')
     }
   },
-  mounted () {
+  created () {
     this.loading = true
     this.getTeamCookie()
   },
@@ -163,6 +165,7 @@ export default {
       }
     },
     bindCurrentTeam (teamId) {
+      this.teamInGame = true
       this.$bind('currentTeam',
         gamesCollection.doc(this.id)
           .collection('teams')

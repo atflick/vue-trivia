@@ -30,7 +30,7 @@
         <q-slider
           v-model="timer"
           :min="30"
-          :max="600"
+          :max="300"
           :step="15"
           snap
           color="primary"
@@ -144,6 +144,7 @@ export default {
       const settings = {
         questions: this.questions,
         category: this.category,
+        difficulty: this.difficulty,
         timer: this.timer
       }
       const gameId = this.game.id

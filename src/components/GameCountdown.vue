@@ -3,9 +3,9 @@
     <CenterContainer maxWidth="550px">
       <q-circular-progress
         show-value
-        :value="-secondsLeft"
+        :value="-msLeft <= -500 ? -msLeft : -500"
         :min="-spinnerMax"
-        :max="0"
+        :max="-500"
         size="300px"
         :thickness="0.3"
         color="orange"
@@ -36,39 +36,35 @@ export default {
     return {
       msLeft: this.startTime - new Date().getTime(),
       initialTime: this.startTime - gameWait,
-      spinnerMax: gameWait / 1000
+      spinnerMax: gameWait
     }
   },
   created () {
     this.countDownTimer()
   },
   computed: {
+    secondsLeft () {
+      const seconds = this.msLeft / 1000
+      return seconds <= 0 ? 0 : seconds
+    },
     timeLeft () {
-      const secondsLeft = this.msLeft / 1000
-      console.log(secondsLeft)
-
-      const minutes = Math.floor(secondsLeft / 60)
-      const seconds = secondsLeft % 60
+      const minutes = Math.floor(this.secondsLeft / 60)
+      const seconds = this.secondsLeft % 60
 
       if (minutes >= 1) {
         return `less than ${minutes + 1} minutes`
       } else {
         return `${seconds < 0 ? 0 : Math.floor(seconds)} second${seconds === 1 ? '' : 's'}`
       }
-    },
-    secondsLeft () {
-      console.log(this.msLeft / 1000)
-
-      return this.msLeft / 1000
     }
   },
   methods: {
     countDownTimer () {
       if (this.msLeft > 0) {
         setTimeout(() => {
-          this.msLeft -= 1000
+          this.msLeft -= 100
           this.countDownTimer()
-        }, 1000)
+        }, 100)
       } else {
         gamesCollection.doc(this.gameId)
           .set({
@@ -77,7 +73,6 @@ export default {
       }
     }
   }
-
 }
 </script>
 
