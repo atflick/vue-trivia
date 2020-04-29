@@ -47,7 +47,7 @@
 import { debounce } from '@/utils'
 import { gamesCollection } from '@/db'
 import axios from 'axios'
-import { gameWait } from '@/variables'
+import { gameWait, questionBuffer } from '@/variables'
 
 export default {
   name: 'GameSettings',
@@ -141,12 +141,7 @@ export default {
   },
   methods: {
     updateSettings: debounce(function () {
-      const settings = {
-        questions: this.questions,
-        category: this.category,
-        difficulty: this.difficulty,
-        timer: this.timer
-      }
+      const settings = this.getSettings()
       const gameId = this.game.id
       gamesCollection.doc(gameId)
         .set({ settings }, { merge: true })
@@ -182,6 +177,14 @@ export default {
         return 30
       }
     },
+    getSettings () {
+      return {
+        questions: this.questions,
+        category: this.category,
+        difficulty: this.difficulty,
+        timer: this.timer * 1000
+      }
+    },
     start () {
       let url = 'https://opentdb.com/api.php?'
       url += `amount=${this.questions}`
@@ -195,13 +198,23 @@ export default {
       }
 
       axios.get(url).then(({ data }) => {
+        const settings = this.getSettings()
         const t = new Date()
         const utc = t.getTime() + gameWait
-
+        const questionEndTimes = []
+        for (let index = 0; index < data.results.length; index++) {
+          if (index === 0) {
+            questionEndTimes.push(utc + (this.timer * 1000) + questionBuffer)
+          } else {
+            questionEndTimes.push(questionEndTimes[index - 1] + (this.timer * 1000) + questionBuffer)
+          }
+        }
         gamesCollection.doc(this.game.id)
           .set({
+            settings,
             questions: data.results,
-            startTime: utc
+            startTime: utc,
+            questionEndTimes
           }, { merge: true })
       })
     }

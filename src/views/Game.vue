@@ -44,14 +44,22 @@
             </CenterContainer>
           </div>
 
-          <CreateTeam v-else :team="teamCookie.name" :host="host" :gameId="game.id" @team-join="onTeamJoin"/>
+          <CreateTeam v-else :team="teamCookie.name" :host="host" :gameId="id" @team-join="onTeamJoin"/>
 
         </div>
 
         <div class="game" v-if="started && !loading">
           <div v-if="!teamInGame" class="not-in-game">Sorry this game is already in progress</div>
           <div v-else-if="inProgress" class="questions">
-            <Questions :questions="game.questions" :currentQuestion="game.currentQuestion" :teamRef="teamRef" :teamAnswers="currentTeam ? currentTeam.answers : null" />
+            <Questions
+              :gameId="id"
+              :questions="game.questions"
+              :currentQuestion="game.currentQuestion"
+              :teamRef="teamRef"
+              :teamAnswers="currentTeam ? currentTeam.answers : null"
+              :timerEndTime="game.questionEndTimes[game.currentQuestion - 1]"
+              :questionTimer="game.settings.timer"
+            />
           </div>
           <GameCountdown v-else :startTime="game.startTime" :gameId="id" />
         </div>
@@ -96,6 +104,7 @@ export default {
         name: '',
         id: ''
       },
+      teamId: null,
       teamInGame: false,
       loading: true,
       isHost: false,
@@ -130,27 +139,36 @@ export default {
         this.inProgress = true
       }
     },
-    teams () {
-      const teams = this.teams
-      if (teams.length) {
-        const teamIndex = teams.findIndex((team) => {
-          return typeof team !== 'object' ? false : team.id === this.teamCookie.id
-        })
+    // teams () {
+    //   const teams = this.teams
+    //   if (teams.length) {
+    //     const teamIndex = teams.findIndex((team) => {
+    //       return typeof team !== 'object' ? false : team.id === this.teamCookie.id
+    //     })
 
-        this.teamInGame = teamIndex !== -1
-      } else {
-        this.teamInGame = false
-      }
+    //     this.teamInGame = teamIndex !== -1
+    //   } else {
+    //     this.teamInGame = false
+    //   }
+    // },
+    teamId (id) {
+      this.bindCurrentTeam(id)
     },
-    teamInGame () {
-      if (this.teamCookie.id.length) {
-        this.bindCurrentTeam(this.teamCookie.id)
-      }
-    },
+    // teamInGame () {
+    //   if (this.teamCookie.id.length) {
+    //     this.bindCurrentTeam(this.teamCookie.id)
+    //   }
+    // },
     currentTeam (team) {
+      console.log('current team changed', team)
+
       if (team) {
+        this.teamInGame = true
         this.isHost = team.host
         this.teamRef = gamesCollection.doc(this.id).collection('teams').doc(team.id)
+        console.log('team ref', this.teamRef)
+      } else {
+        this.teamInGame = false
       }
     }
   },
@@ -162,19 +180,22 @@ export default {
       const cookie = this.$cookies.get('vue-trivia-team')
       if (cookie !== null) {
         this.teamCookie = cookie
+        this.teamId = cookie.id
       }
     },
     bindCurrentTeam (teamId) {
-      this.teamInGame = true
+      // this.teamInGame = true
+      console.log('binding team', teamId)
+
       this.$bind('currentTeam',
         gamesCollection.doc(this.id)
           .collection('teams')
           .doc(teamId)
       )
+      console.log('binding', this.currentTeam)
     },
     onTeamJoin (teamId, host) {
-      this.bindCurrentTeam(teamId)
-      this.teamInGame = true
+      this.teamId = teamId
       this.isHost = !!host
     }
   }

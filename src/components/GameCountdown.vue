@@ -3,9 +3,9 @@
     <CenterContainer maxWidth="550px">
       <q-circular-progress
         show-value
-        :value="-msLeft <= -500 ? -msLeft : -500"
+        :value="-msLeft <= -500 ? -msLeft : -1000"
         :min="-spinnerMax"
-        :max="-500"
+        :max="-1000"
         size="300px"
         :thickness="0.3"
         color="orange"
@@ -62,9 +62,9 @@ export default {
     countDownTimer () {
       if (this.msLeft > 0) {
         setTimeout(() => {
-          this.msLeft -= 100
+          this.msLeft -= 50
           this.countDownTimer()
-        }, 100)
+        }, 50)
       } else {
         gamesCollection.doc(this.gameId)
           .set({

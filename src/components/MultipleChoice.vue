@@ -40,6 +40,8 @@ export default {
     },
     updateAnswer: debounce(function (value) {
       const answers = {}
+      console.log(this.teamRef)
+
       answers[`question_${this.questionNum}`] = value
       this.teamRef.set({ answers }, { merge: true })
     }, 1000),
