@@ -1,7 +1,7 @@
 <template>
   <div class="multiple-choice">
     <q-radio
-      v-for="option in options"
+      v-for="option in question.answers"
       :key="option"
       v-model="answer"
       :val="option"
@@ -22,26 +22,14 @@ export default {
       answer: null
     }
   },
-  watch: {
-    savedAnswer () {
+  mounted () {
+    if (this.savedAnswer) {
       this.answer = this.savedAnswer
     }
   },
-  computed: {
-    options () {
-      const answers = this.question.incorrect_answers
-      answers.push(this.question.correct_answer)
-      return this.shuffle(answers)
-    }
-  },
   methods: {
-    shuffle (array) {
-      return array.sort(() => Math.random() - 0.5)
-    },
     updateAnswer: debounce(function (value) {
       const answers = {}
-      console.log(this.teamRef)
-
       answers[`question_${this.questionNum}`] = value
       this.teamRef.set({ answers }, { merge: true })
     }, 1000),
@@ -51,7 +39,6 @@ export default {
       return txt.value
     }
   }
-
 }
 </script>
 

@@ -6,9 +6,11 @@ import './styles/main.scss'
 import VueCookies from 'vue-cookies'
 import { firestorePlugin } from 'vuefire'
 import { db } from './db'
+import VueScrollTo from 'vue-scrollto'
 
 Vue.use(VueCookies)
 Vue.use(firestorePlugin)
+Vue.use(VueScrollTo)
 Vue.$cookies.config('60d')
 
 Vue.config.productionTip = false

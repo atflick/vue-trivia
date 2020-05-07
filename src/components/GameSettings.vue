@@ -1,45 +1,49 @@
 <template>
   <div class="game-settings">
-    <h3>Game Setup</h3>
-    <div class="game-settings-inner">
-      <div class="game-settings-field">
-        <label>Number of Questions: {{questions}}</label>
-        <q-slider
-          v-model="questions"
-          :min="10"
-          :max="50"
-          :step="5"
-          snap
-          color="primary"
-          @change="updateSettings"
-        />
-      </div>
+    <div v-if="!loading">
+      <h3>Game Setup</h3>
+      <div class="game-settings-inner">
+        <div class="game-settings-field">
+          <label>Number of Questions: {{questions}}</label>
+          <q-slider
+            v-model="questions"
+            :min="10"
+            :max="50"
+            :step="5"
+            snap
+            color="primary"
+            @change="updateSettings"
+          />
+        </div>
 
-      <div class="game-settings-field -extra-space">
-        <label>Category</label>
-        <q-select v-model="category" :options="categoryOptions" @input="updateSettings" />
-      </div>
+        <div class="game-settings-field -extra-space">
+          <label>Category</label>
+          <q-select v-model="category" :options="categoryOptions" @input="updateSettings" />
+        </div>
 
-      <div class="game-settings-field -extra-space">
-        <label>Difficulty</label>
-        <q-select v-model="difficulty" :options="difficultyOptions" @input="updateSettings" />
-      </div>
+        <div class="game-settings-field -extra-space">
+          <label>Difficulty</label>
+          <q-select v-model="difficulty" :options="difficultyOptions" @input="updateSettings" />
+        </div>
 
-      <div class="game-settings-field">
-        <label>Question Timer: {{timer}} seconds</label>
-        <q-slider
-          v-model="timer"
-          :min="30"
-          :max="300"
-          :step="15"
-          snap
-          color="primary"
-          @change="updateSettings"
-        />
-      </div>
+        <div class="game-settings-field">
+          <label>Question Timer: {{timer}} seconds</label>
+          <q-slider
+            v-model="timer"
+            :min="30"
+            :max="300"
+            :step="15"
+            snap
+            color="primary"
+            @change="updateSettings"
+          />
+        </div>
 
-      <q-btn @click="start">Start game</q-btn>
+        <q-btn @click="start">Start game</q-btn>
+      </div>
     </div>
+
+    <Loader v-else />
   </div>
 </template>
 
@@ -48,9 +52,13 @@ import { debounce } from '@/utils'
 import { gamesCollection } from '@/db'
 import axios from 'axios'
 import { gameWait, questionBuffer } from '@/variables'
+import Loader from '@/components/Loader'
 
 export default {
   name: 'GameSettings',
+  components: {
+    Loader
+  },
   props: ['game'],
   data () {
     return {
@@ -136,7 +144,8 @@ export default {
           value: '28'
         }
       ],
-      difficultyOptions: ['Easy', 'Medium', 'Hard']
+      difficultyOptions: ['Easy', 'Medium', 'Hard'],
+      loading: false
     }
   },
   methods: {
@@ -186,6 +195,7 @@ export default {
       }
     },
     start () {
+      this.loading = true
       let url = 'https://opentdb.com/api.php?'
       url += `amount=${this.questions}`
 
@@ -198,13 +208,21 @@ export default {
       }
 
       axios.get(url).then(({ data }) => {
+        const questions = data.results.map((question) => {
+          if (question.type === 'multiple') {
+            const answers = question.incorrect_answers
+            answers.push(question.correct_answer)
+            question.answers = answers.sort(() => Math.random() - 0.5)
+          }
+          return question
+        })
         const settings = this.getSettings()
         const t = new Date()
-        const utc = t.getTime() + gameWait
+        const startTime = t.getTime() + gameWait
         const questionEndTimes = []
         for (let index = 0; index < data.results.length; index++) {
           if (index === 0) {
-            questionEndTimes.push(utc + (this.timer * 1000) + questionBuffer)
+            questionEndTimes.push(startTime + (this.timer * 1000) + questionBuffer)
           } else {
             questionEndTimes.push(questionEndTimes[index - 1] + (this.timer * 1000) + questionBuffer)
           }
@@ -212,10 +230,12 @@ export default {
         gamesCollection.doc(this.game.id)
           .set({
             settings,
-            questions: data.results,
-            startTime: utc,
+            questions,
+            startTime,
             questionEndTimes
-          }, { merge: true })
+          }, { merge: true }).then(() => {
+            console.log('start game')
+          })
       })
     }
   }

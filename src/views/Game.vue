@@ -13,7 +13,7 @@
       <!-- drawer content -->
       <q-btn dense flat round icon="close" @click="right = !right" />
 
-      <Leaderboard :teams="teams" />
+      <Leaderboard :teams="teams" :questions="game.questions"/>
     </q-drawer>
 
     <q-page-container>
@@ -37,10 +37,10 @@
               />
               <h3>Waiting...</h3>
               <p>The host is setting up the game and will start when ready.</p>
-              <div class="">Number of questions: {{ game.settings.questions ? game.settings.questions : 10 }}</div>
-              <div class="">Category: {{ game.settings.category ? game.settings.category.label : 'All Categories' }}</div>
-              <div class="">Difficulty: {{ game.settings.difficulty ? game.settings.difficulty: 'Any Difficulty' }}</div>
-              <div class="">Question Timer: {{ game.settings.timer ? game.settings.timer : 30 }} seconds</div>
+              <div>Number of questions: {{ game.settings.questions ? game.settings.questions : 10 }}</div>
+              <div>Category: {{ game.settings.category ? game.settings.category.label : 'All Categories' }}</div>
+              <div>Difficulty: {{ game.settings.difficulty ? game.settings.difficulty: 'Any Difficulty' }}</div>
+              <div>Question Timer: {{ game.settings.timer ? game.settings.timer : 30 }} seconds</div>
             </CenterContainer>
           </div>
 
@@ -116,7 +116,7 @@ export default {
   firestore () {
     return {
       game: gamesCollection.doc(this.id),
-      teams: gamesCollection.doc(this.id).collection('teams')
+      teams: gamesCollection.doc(this.id).collection('teams').orderBy('score')
     }
   },
   created () {
@@ -139,34 +139,14 @@ export default {
         this.inProgress = true
       }
     },
-    // teams () {
-    //   const teams = this.teams
-    //   if (teams.length) {
-    //     const teamIndex = teams.findIndex((team) => {
-    //       return typeof team !== 'object' ? false : team.id === this.teamCookie.id
-    //     })
-
-    //     this.teamInGame = teamIndex !== -1
-    //   } else {
-    //     this.teamInGame = false
-    //   }
-    // },
     teamId (id) {
       this.bindCurrentTeam(id)
     },
-    // teamInGame () {
-    //   if (this.teamCookie.id.length) {
-    //     this.bindCurrentTeam(this.teamCookie.id)
-    //   }
-    // },
     currentTeam (team) {
-      console.log('current team changed', team)
-
       if (team) {
         this.teamInGame = true
         this.isHost = team.host
         this.teamRef = gamesCollection.doc(this.id).collection('teams').doc(team.id)
-        console.log('team ref', this.teamRef)
       } else {
         this.teamInGame = false
       }
@@ -184,15 +164,11 @@ export default {
       }
     },
     bindCurrentTeam (teamId) {
-      // this.teamInGame = true
-      console.log('binding team', teamId)
-
       this.$bind('currentTeam',
         gamesCollection.doc(this.id)
           .collection('teams')
           .doc(teamId)
       )
-      console.log('binding', this.currentTeam)
     },
     onTeamJoin (teamId, host) {
       this.teamId = teamId
@@ -221,7 +197,7 @@ export default {
     }
 
     &-container {
-      padding: 50px 25px;
+      padding: 50px 15px;
 
       @include from(7) {
         padding: 75px;
