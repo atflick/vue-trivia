@@ -77,6 +77,7 @@ import { gamesCollection } from '@/db'
 import { questionBuffer } from '@/variables'
 import MultipleChoice from '@/components/MultipleChoice'
 import Boolean from '@/components/Boolean'
+import Worker from '@/heartbeat.worker.js'
 
 export default {
   name: 'Questions',
@@ -87,12 +88,16 @@ export default {
   props: ['gameId', 'questions', 'currentQuestion', 'teamRef', 'teamAnswers', 'timerEndTime', 'questionTimer'],
   data () {
     return {
-      msLeft: this.timerEndTime - new Date().getTime(),
+      now: new Date().getTime(),
       spinnerMax: questionBuffer + this.questionTimer
     }
   },
   created () {
-    this.countDownTimer()
+    this.worker = new Worker()
+    this.worker.onmessage = () => {
+      this.now = new Date().getTime()
+      console.log('Now', this.now)
+    }
   },
   computed: {
     activeQuestions () {
@@ -104,6 +109,9 @@ export default {
     showQuestion () {
       return this.msLeft < this.questionTimer
     },
+    msLeft () {
+      return this.timerEndTime - this.now
+    },
     msLeftDisplay () {
       const num = this.msLeft / 1000
       return num <= 0 ? 0 : parseFloat(num.toFixed(0))
@@ -111,11 +119,23 @@ export default {
   },
   watch: {
     currentQuestion (qNum) {
-      this.msLeft = this.timerEndTime - new Date().getTime()
-      this.countDownTimer()
+      // this.msLeft = this.timerEndTime - new Date().getTime()
+      // this.countDownTimer()
       setTimeout(() => {
-        this.$scrollTo(this.$refs[`question${qNum}`][0], 1500, { offset: -20, easing: 'ease-in-out' })
-      }, 20)
+        this.$scrollTo(this.$refs[`question${qNum}`][0], 700, { offset: -20, easing: 'ease-in-out' })
+      }, 1000)
+    },
+    msLeft (now) {
+      if (now < 0) {
+        this.calcScore()
+        gamesCollection.doc(this.gameId)
+          .set({
+            currentQuestion: this.currentQuestion + 1
+          }, { merge: true })
+      } else if (this.currentQuestion >= this.questions.length) {
+        this.gameEnd = true
+        this.worker.terminate()
+      }
     }
   },
   methods: {
@@ -134,23 +154,23 @@ export default {
         return 'fas fa-times-circle'
       }
     },
-    countDownTimer () {
-      if (this.msLeft > 0) {
-        setTimeout(() => {
-          this.msLeft -= 50
-          this.countDownTimer()
-        }, 50)
-      } else if (this.currentQuestion >= this.questions.length) {
-        this.gameEnd = true
-      } else {
-        this.calcScore()
+    // countDownTimer () {
+    //   if (this.msLeft > 0) {
+    //     setTimeout(() => {
+    //       this.msLeft -= 50
+    //       this.countDownTimer()
+    //     }, 50)
+    //   } else if (this.currentQuestion >= this.questions.length) {
+    //     this.gameEnd = true
+    //   } else {
+    //     this.calcScore()
 
-        gamesCollection.doc(this.gameId)
-          .set({
-            currentQuestion: this.currentQuestion + 1
-          }, { merge: true })
-      }
-    },
+    //     gamesCollection.doc(this.gameId)
+    //       .set({
+    //         currentQuestion: this.currentQuestion + 1
+    //       }, { merge: true })
+    //   }
+    // },
     calcScore () {
       // eslint-disable-next-line camelcase
       const scoreTotal = this.activeQuestions.reduce((score, { correct_answer }, index) => {
@@ -212,6 +232,7 @@ export default {
     &-question {
       display: inline;
       @include font-weight(bold);
+      @include rem(font-size, 18px);
     }
 
     &-bottom {

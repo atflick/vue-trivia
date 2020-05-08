@@ -7,10 +7,12 @@ import VueCookies from 'vue-cookies'
 import { firestorePlugin } from 'vuefire'
 import { db } from './db'
 import VueScrollTo from 'vue-scrollto'
+import VueWorker from 'vue-worker'
 
 Vue.use(VueCookies)
 Vue.use(firestorePlugin)
 Vue.use(VueScrollTo)
+Vue.use(VueWorker)
 Vue.$cookies.config('60d')
 
 Vue.config.productionTip = false

@@ -116,7 +116,7 @@ export default {
   firestore () {
     return {
       game: gamesCollection.doc(this.id),
-      teams: gamesCollection.doc(this.id).collection('teams').orderBy('score')
+      teams: gamesCollection.doc(this.id).collection('teams').orderBy('score', 'desc')
     }
   },
   created () {

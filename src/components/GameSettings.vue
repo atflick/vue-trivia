@@ -30,7 +30,7 @@
           <label>Question Timer: {{timer}} seconds</label>
           <q-slider
             v-model="timer"
-            :min="30"
+            :min="15"
             :max="300"
             :step="15"
             snap
