@@ -78,6 +78,7 @@ import { questionBuffer } from '@/variables'
 import MultipleChoice from '@/components/MultipleChoice'
 import Boolean from '@/components/Boolean'
 import Worker from '@/heartbeat.worker.js'
+console.log(Worker)
 
 export default {
   name: 'Questions',
@@ -92,7 +93,7 @@ export default {
       spinnerMax: questionBuffer + this.questionTimer
     }
   },
-  created () {
+  mounted () {
     this.worker = new Worker()
     this.worker.onmessage = () => {
       this.now = new Date().getTime()

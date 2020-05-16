@@ -34,6 +34,16 @@ module.exports = {
       }
     }
   },
+  configureWebpack: {
+    module: {
+      rules: [
+        {
+          test: /\.worker\.js$/,
+          use: { loader: 'worker-loader' }
+        }
+      ]
+    }
+  },
   chainWebpack (config) {
     // Load variables for all vue-files
     const types = ['vue-modules', 'vue', 'normal-modules', 'normal']
@@ -50,11 +60,11 @@ module.exports = {
       .loader('import-glob-loader')
       .end()
 
-    config.module
-      .rule('worker')
-      .test(/\.worker\.js$/)
-      .use('worker-loader')
-      .loader('worker-loader')
-      .end()
+    // config.module
+    //   .rule('worker')
+    //   .test(/\.worker\.js$/)
+    //   .use('worker-loader')
+    //   .loader('worker-loader')
+    //   .end()
   }
 }

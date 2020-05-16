@@ -1,7 +1,7 @@
 function heartbeat () {
-  // const t = new Date()
-  // const utc = t.getTime()
-  postMessage()
+  const t = new Date()
+  const utc = t.getTime()
+  postMessage(utc)
 }
 
 setInterval(function () {

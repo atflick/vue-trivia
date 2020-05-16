@@ -2,16 +2,19 @@
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="bg-primary text-white">
       <q-toolbar class="game-header">
-        <div class="game-title">{{ game.name }}</div>
+        <div class="game-title">Trivy You All</div>
         <q-space />
 
-        <q-btn flat label="Leaderboard" icon-right="menu" @click="right = !right" />
+        <q-btn class="game-drawer-btn" flat label="Leaderboard" icon-right="menu" @click="right = !right" />
       </q-toolbar>
     </q-header>
 
     <q-drawer show-if-above v-model="right" side="right" bordered>
       <!-- drawer content -->
-      <q-btn dense flat round icon="close" @click="right = !right" />
+      <div class="game-drawer">
+        <div class="game-name">{{ game.name }}</div>
+        <q-btn dense flat round icon="close" @click="right = !right" />
+      </div>
 
       <Leaderboard :teams="teams" :questions="game.questions"/>
     </q-drawer>
@@ -202,6 +205,32 @@ export default {
       @include from(7) {
         padding: 75px;
       }
+    }
+
+    &-drawer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px 8px 0;
+      border-bottom: 1px solid primary-color(gray, tint1);
+
+      &-btn {
+        .q-btn__content {
+          > div {
+            @include rem(font-size, 18px);
+
+            @include to(6) {
+              display: none;
+            }
+          }
+        }
+      }
+    }
+
+    &-name {
+      padding: 0 8px;
+      @include rem(font-size, 20px);
+      /* font-family: header; */
     }
   }
 

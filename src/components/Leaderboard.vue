@@ -35,6 +35,7 @@ export default {
         padding: 12px 25px 12px 35px;
         border-bottom: 1px solid primary-color(gray, tint2);
         counter-increment: li;
+        transition: $te $ts;
 
         &::before {
           content: counter(li)'.';
