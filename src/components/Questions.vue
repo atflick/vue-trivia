@@ -1,5 +1,6 @@
 <template>
   <div class="questions">
+    {{ msLeft}} {{currentQuestion}}
     <transition-group name="slide-in">
       <div class="question-block" v-for="(question, index) in activeQuestions" :key="index + 1" :disabled="index + 1 !== currentQuestion" :ref="`question${index + 1}`">
         <div v-if="!showQuestion && index + 1 === currentQuestion" class="question-skeleton">
