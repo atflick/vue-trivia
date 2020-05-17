@@ -78,7 +78,6 @@ import { questionBuffer } from '@/variables'
 import MultipleChoice from '@/components/MultipleChoice'
 import Boolean from '@/components/Boolean'
 import Worker from '@/heartbeat.worker.js'
-console.log(Worker)
 
 export default {
   name: 'Questions',
@@ -93,11 +92,10 @@ export default {
       spinnerMax: questionBuffer + this.questionTimer
     }
   },
-  mounted () {
+  created () {
     this.worker = new Worker()
     this.worker.onmessage = () => {
       this.now = new Date().getTime()
-      console.log('Now', this.now)
     }
   },
   computed: {
@@ -120,8 +118,6 @@ export default {
   },
   watch: {
     currentQuestion (qNum) {
-      // this.msLeft = this.timerEndTime - new Date().getTime()
-      // this.countDownTimer()
       setTimeout(() => {
         this.$scrollTo(this.$refs[`question${qNum}`][0], 700, { offset: -20, easing: 'ease-in-out' })
       }, 1000)
@@ -133,7 +129,7 @@ export default {
           .set({
             currentQuestion: this.currentQuestion + 1
           }, { merge: true })
-      } else if (this.currentQuestion >= this.questions.length) {
+      } else if (this.currentQuestion > this.questions.length) {
         this.gameEnd = true
         this.worker.terminate()
       }
@@ -155,23 +151,6 @@ export default {
         return 'fas fa-times-circle'
       }
     },
-    // countDownTimer () {
-    //   if (this.msLeft > 0) {
-    //     setTimeout(() => {
-    //       this.msLeft -= 50
-    //       this.countDownTimer()
-    //     }, 50)
-    //   } else if (this.currentQuestion >= this.questions.length) {
-    //     this.gameEnd = true
-    //   } else {
-    //     this.calcScore()
-
-    //     gamesCollection.doc(this.gameId)
-    //       .set({
-    //         currentQuestion: this.currentQuestion + 1
-    //       }, { merge: true })
-    //   }
-    // },
     calcScore () {
       // eslint-disable-next-line camelcase
       const scoreTotal = this.activeQuestions.reduce((score, { correct_answer }, index) => {

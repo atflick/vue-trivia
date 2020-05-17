@@ -59,12 +59,5 @@ module.exports = {
       .use('import-glob-loader')
       .loader('import-glob-loader')
       .end()
-
-    // config.module
-    //   .rule('worker')
-    //   .test(/\.worker\.js$/)
-    //   .use('worker-loader')
-    //   .loader('worker-loader')
-    //   .end()
   }
 }
