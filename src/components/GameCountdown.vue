@@ -8,7 +8,7 @@
         :max="-200"
         size="300px"
         :thickness="0.3"
-        color="orange"
+        color="secondary"
         track-color="grey-3"
       >
         <div class="game-countdown-inner">
@@ -25,7 +25,7 @@
 import { gamesCollection } from '@/db'
 import CenterContainer from '@/components/CenterContainer'
 import { gameWait, questionBuffer } from '@/variables'
-import Worker from '@/heartbeat.worker.js'
+import Worker from '@/workers/heartbeat.worker.js'
 
 export default {
   name: 'GameCountdown',

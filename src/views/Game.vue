@@ -138,8 +138,6 @@ export default {
   },
   watch: {
     game () {
-      console.log(this.game)
-
       if (this.game && this.game.name) {
         this.loading = false
       }
@@ -191,7 +189,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
   .game {
     &-header {
       @include from(7) {

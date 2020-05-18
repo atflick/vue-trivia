@@ -225,9 +225,7 @@ export default {
             questions,
             startTime,
             countdown: gameWait
-          }, { merge: true }).then(() => {
-            console.log('start game')
-          })
+          }, { merge: true })
       })
     }
   }

@@ -62,6 +62,7 @@ export default {
 
 <style lang="scss">
   .home {
+    padding: 50px 15px;
     height: 100%;
     display: flex;
     align-items: center;

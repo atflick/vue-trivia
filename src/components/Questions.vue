@@ -33,7 +33,7 @@
                 :max="-10"
                 size="100px"
                 :thickness="0.3"
-                color="orange"
+                color="secondary"
                 track-color="grey-3"
                 v-if="index + 1 === currentQuestion"
               >
@@ -77,7 +77,7 @@ import { gamesCollection } from '@/db'
 import { questionBuffer } from '@/variables'
 import MultipleChoice from '@/components/MultipleChoice'
 import Boolean from '@/components/Boolean'
-import Worker from '@/heartbeat.worker.js'
+import Worker from '@/workers/heartbeat.worker.js'
 
 export default {
   name: 'Questions',

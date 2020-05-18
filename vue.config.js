@@ -10,9 +10,9 @@ function addStyleResource (rule) {
         path.resolve(__dirname, './src/styles/vendor/_vendor.scss'),
         path.resolve(__dirname, './src/styles/helpers/mixins/**/*.scss'),
         path.resolve(__dirname, './src/styles/helpers/functions/**/*.scss'),
-        // path.resolve(__dirname, './src/styles/_colors.scss'),
-        // path.resolve(__dirname, './src/styles/_settings.scss'),
-        path.resolve(__dirname, './src/styles/main.scss')
+        path.resolve(__dirname, './src/styles/_colors.scss'),
+        path.resolve(__dirname, './src/styles/_settings.scss')
+        // path.resolve(__dirname, './src/styles/main.scss')
       ]
     })
 }
