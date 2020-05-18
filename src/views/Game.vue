@@ -60,11 +60,21 @@
               :currentQuestion="game.currentQuestion"
               :teamRef="teamRef"
               :teamAnswers="currentTeam ? currentTeam.answers : null"
-              :timerEndTime="game.questionEndTimes[game.currentQuestion - 1]"
               :questionTimer="game.settings.timer"
+              :questionEndTime="game.questionEndTime"
+              :countdown="game.countdown"
+              :isHost="isHost"
             />
           </div>
-          <GameCountdown v-else :startTime="game.startTime" :gameId="id" />
+
+          <GameCountdown
+            v-else
+            :startTime="game.startTime"
+            :gameId="id"
+            :questionTimer="game.settings.timer"
+            :countdown="game.countdown"
+            :isHost="isHost"
+          />
         </div>
       </div>
     </q-page-container>

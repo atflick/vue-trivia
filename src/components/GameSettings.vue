@@ -51,7 +51,7 @@
 import { debounce } from '@/utils'
 import { gamesCollection } from '@/db'
 import axios from 'axios'
-import { gameWait, questionBuffer } from '@/variables'
+import { gameWait } from '@/variables'
 import Loader from '@/components/Loader'
 
 export default {
@@ -219,20 +219,12 @@ export default {
         const settings = this.getSettings()
         const t = new Date()
         const startTime = t.getTime() + gameWait
-        const questionEndTimes = []
-        for (let index = 0; index < data.results.length; index++) {
-          if (index === 0) {
-            questionEndTimes.push(startTime + (this.timer * 1000) + questionBuffer)
-          } else {
-            questionEndTimes.push(questionEndTimes[index - 1] + (this.timer * 1000) + questionBuffer)
-          }
-        }
         gamesCollection.doc(this.game.id)
           .set({
             settings,
             questions,
             startTime,
-            questionEndTimes
+            countdown: gameWait
           }, { merge: true }).then(() => {
             console.log('start game')
           })

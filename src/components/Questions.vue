@@ -1,6 +1,5 @@
 <template>
   <div class="questions">
-    {{ msLeft}} {{currentQuestion}}
     <transition-group name="slide-in">
       <div class="question-block" v-for="(question, index) in activeQuestions" :key="index + 1" :disabled="index + 1 !== currentQuestion" :ref="`question${index + 1}`">
         <div v-if="!showQuestion && index + 1 === currentQuestion" class="question-skeleton">
@@ -29,7 +28,7 @@
             <transition name="fade" mode="out-in">
               <q-circular-progress
                 show-value
-                :value="-msLeft <= -10 ? -msLeft : -10"
+                :value="-countdown <= -10 ? -countdown : -10"
                 :min="-spinnerMax"
                 :max="-10"
                 size="100px"
@@ -38,7 +37,7 @@
                 track-color="grey-3"
                 v-if="index + 1 === currentQuestion"
               >
-                {{msLeftDisplay}}
+                {{countdownDisplay}}
               </q-circular-progress>
 
               <q-icon v-else :name="checkAnswer(question.correct_answer, index + 1)" />
@@ -86,17 +85,19 @@ export default {
     MultipleChoice,
     Boolean
   },
-  props: ['gameId', 'questions', 'currentQuestion', 'teamRef', 'teamAnswers', 'timerEndTime', 'questionTimer'],
+  props: ['gameId', 'questions', 'currentQuestion', 'teamRef', 'teamAnswers', 'questionTimer', 'questionEndTime', 'countdown', 'isHost'],
   data () {
     return {
       now: new Date().getTime(),
-      spinnerMax: questionBuffer + this.questionTimer
+      spinnerMax: this.questionTimer
     }
   },
   created () {
-    this.worker = new Worker()
-    this.worker.onmessage = () => {
-      this.now = new Date().getTime()
+    if (this.isHost) {
+      this.worker = new Worker()
+      this.worker.onmessage = () => {
+        this.now = new Date().getTime()
+      }
     }
   },
   computed: {
@@ -107,32 +108,42 @@ export default {
       return this.activeQuestions.length
     },
     showQuestion () {
-      return this.msLeft < this.questionTimer
+      return this.countdown < this.questionTimer
     },
     msLeft () {
-      return this.timerEndTime - this.now
+      return this.questionEndTime - this.now
     },
-    msLeftDisplay () {
-      const num = this.msLeft / 1000
+    countdownDisplay () {
+      const num = this.countdown / 1000
       return num <= 0 ? 0 : parseFloat(num.toFixed(0))
     }
   },
   watch: {
     currentQuestion (qNum) {
+      this.calcScore()
       setTimeout(() => {
         this.$scrollTo(this.$refs[`question${qNum}`][0], 700, { offset: -20, easing: 'ease-in-out' })
       }, 1000)
+
+      if (qNum > this.questions.length) {
+        this.gameEnd = true
+      }
     },
     msLeft (now) {
-      if (now < 0) {
-        this.calcScore()
+      if (this.currentQuestion > this.questions.length) {
+        this.worker.terminate()
+      } else if (now < 0) {
+        const questionEndTime = this.now + questionBuffer + this.questionTimer
         gamesCollection.doc(this.gameId)
           .set({
-            currentQuestion: this.currentQuestion + 1
+            currentQuestion: this.currentQuestion + 1,
+            questionEndTime
           }, { merge: true })
-      } else if (this.currentQuestion > this.questions.length) {
-        this.gameEnd = true
-        this.worker.terminate()
+      } else {
+        gamesCollection.doc(this.gameId)
+          .set({
+            countdown: now
+          }, { merge: true })
       }
     }
   },

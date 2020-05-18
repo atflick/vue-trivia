@@ -3,9 +3,9 @@
     <CenterContainer maxWidth="550px">
       <q-circular-progress
         show-value
-        :value="-msLeft <= -500 ? -msLeft : -1000"
+        :value="-countdown <= -200 ? -countdown : -200"
         :min="-spinnerMax"
-        :max="-1000"
+        :max="-200"
         size="300px"
         :thickness="0.3"
         color="orange"
@@ -24,27 +24,36 @@
 <script>
 import { gamesCollection } from '@/db'
 import CenterContainer from '@/components/CenterContainer'
-import { gameWait } from '@/variables'
+import { gameWait, questionBuffer } from '@/variables'
+import Worker from '@/heartbeat.worker.js'
 
 export default {
   name: 'GameCountdown',
   components: {
     CenterContainer
   },
-  props: ['startTime', 'gameId'],
+  props: ['startTime', 'gameId', 'questionTimer', 'countdown', 'isHost'],
   data () {
     return {
-      msLeft: this.startTime - new Date().getTime(),
+      now: new Date().getTime(),
       initialTime: this.startTime - gameWait,
       spinnerMax: gameWait
     }
   },
   created () {
-    this.countDownTimer()
+    if (this.isHost) {
+      this.worker = new Worker()
+      this.worker.onmessage = () => {
+        this.now = new Date().getTime()
+      }
+    }
   },
   computed: {
+    msLeft () {
+      return this.startTime - this.now
+    },
     secondsLeft () {
-      const seconds = this.msLeft / 1000
+      const seconds = this.countdown / 1000
       return seconds <= 0 ? 0 : seconds
     },
     timeLeft () {
@@ -58,16 +67,19 @@ export default {
       }
     }
   },
-  methods: {
-    countDownTimer () {
+  watch: {
+    msLeft (now) {
       if (this.msLeft > 0) {
-        setTimeout(() => {
-          this.msLeft -= 50
-          this.countDownTimer()
-        }, 50)
-      } else {
         gamesCollection.doc(this.gameId)
           .set({
+            countdown: this.msLeft
+          }, { merge: true })
+      } else {
+        const questionEndTime = this.now + questionBuffer + this.questionTimer
+        this.worker.terminate()
+        gamesCollection.doc(this.gameId)
+          .set({
+            questionEndTime,
             inProgress: true
           }, { merge: true })
       }
