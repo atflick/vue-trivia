@@ -2,7 +2,7 @@
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="bg-primary text-white">
       <q-toolbar class="game-header">
-        <div class="game-title">Trivy You All</div>
+        <div class="game-title">Trivia</div>
         <q-space />
 
         <q-btn class="game-drawer-btn" flat label="Leaderboard" icon-right="menu" @click="right = !right" />
